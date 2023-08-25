@@ -16,11 +16,16 @@ export default {
       })
       .catch(error => {
         console.log(error)
-
-        this.$router.push({
+        if (error.response && error.response.statue == 404 ) {
+            this.$router.push({
             name: '404Resource',
             params: { resource: 'event' }
-        })
+            })
+        } else {
+            this.$router.push({
+                name: 'NetworkError'
+            })
+        }
       })
   }
 }
