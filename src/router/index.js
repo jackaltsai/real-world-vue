@@ -39,9 +39,10 @@ const router = createRouter({
       ]
     },
     {
-      path: '/about',
-      name: 'about',
+      path: '/about-us',
+      name: 'About',
       component: AboutView,
+      alias: '/about'
     }
   ]
 })
