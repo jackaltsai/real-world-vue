@@ -1,7 +1,7 @@
 <script>
 import EventService from '@/services/EventService.js';
 import EventCard from '../components/EventCard.vue';
-import { watchEffect } from 'vue';
+import NProgress from 'nprogress'
 
 export default {
   name: 'EventList',
@@ -15,19 +15,37 @@ export default {
       totalEvents: 0
     }
   },
-  created() {
-    watchEffect(() => {
-      this.events = null
-      EventService.getEvents(2, this.page)
+  beforeRouteEnter(routeTo, routeFrom, next) {
+    NProgress.start()
+      EventService.getEvents(2, parseInt(routeTo.query.page) || 1)
       .then(response => {
-        this.events = response.data
-        this.totalEvents = response.headers['x-total-count']
+        next(comp => {
+          comp.events = response.data
+          comp.totalEvents = response.headers['x-total-count']
+        })
       })
-      .catch(error => {
-        console.log(error)
-        this.$router.push({ name: 'NetworkError' })
+      .catch(() => {
+        next({ name: 'NetworkError' })
       })
-    })
+      .finally(() => {
+        NProgress.done()
+      })
+    
+  },
+  beforeRouteUpdate(routeTo) {
+    NProgress.start()
+      EventService.getEvents(2, parseInt(routeTo.query.page) || 1)
+      .then(response => {
+          this.events = response.data
+          this.totalEvents = response.headers['x-total-count']
+      })
+      .catch(() => {
+        return { name: 'NetworkError' }
+      })
+      .finally(() => {
+        NProgress.done()
+      })
+    
   },
   computed: {
     hasNextPage() {
