@@ -13,6 +13,13 @@ import GStore from '@/stores'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) { // <----
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  },
   routes: [
     {
       path: '/',
@@ -57,6 +64,7 @@ const router = createRouter({
           path: 'edit',
           name: 'EventEdit',
           component: EventEdit,
+          meta: { requireAuth: true}
         }
       ]
     },
@@ -101,8 +109,23 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach(() => {
+router.beforeEach((to, from) => {
   NProgress.start()
+  const notAuthorized = true
+  if (to.meta.requireAuth && notAuthorized) {
+    GStore.flashMessage = 'Sorry, you are not authorized to view this page'
+
+    setTimeout(() => {
+      GStore.flashMessage = ''
+    }, 3000)
+    
+    if (from.href) {
+      return false
+    } else {
+      return { path: '/'}
+    }
+    
+  }
 })
 
 router.afterEach(() => {
